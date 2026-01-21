@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '@/components/layout/Sidebar';
 import CriticalAlert from '@/components/alerts/CriticalAlert';
+import ChatBot from '@/components/chat/ChatBot';
 import { SensorProvider } from '@/contexts/SensorContext';
 
 interface DashboardLayoutProps {
@@ -17,6 +18,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onLogout }) => {
           <Outlet />
         </main>
         <CriticalAlert />
+        <ChatBot />
       </div>
     </SensorProvider>
   );
