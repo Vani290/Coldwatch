@@ -246,11 +246,11 @@ export const SensorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     loadHistory();
   }, [getStatus, thresholds]);
 
-  // Poll for new data every 5 seconds
+  // Poll for new data every 15 seconds (matches ThingSpeak update rate)
   useEffect(() => {
     fetchData(); // Initial fetch
     
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 15000);
 
     return () => clearInterval(interval);
   }, [fetchData]);

@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Thermometer, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface LoginProps {
-  onLogin: () => void;
-}
-
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { signIn, signUp, resetPassword } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,15 +27,69 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       return;
     }
 
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
     setIsLoading(true);
     
-    // Simulate authentication - will be replaced with Firebase
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(isSignUp ? 'Account created successfully!' : 'Welcome back!');
-      onLogin();
+    try {
+      if (isSignUp) {
+        await signUp(email, password);
+        toast.success('Account created successfully!');
+      } else {
+        await signIn(email, password);
+        toast.success('Welcome back!');
+      }
       navigate('/dashboard');
-    }, 1500);
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      
+      // Handle specific Firebase auth errors
+      const errorCode = error.code;
+      switch (errorCode) {
+        case 'auth/email-already-in-use':
+          toast.error('This email is already registered');
+          break;
+        case 'auth/invalid-email':
+          toast.error('Invalid email address');
+          break;
+        case 'auth/weak-password':
+          toast.error('Password is too weak');
+          break;
+        case 'auth/user-not-found':
+          toast.error('No account found with this email');
+          break;
+        case 'auth/wrong-password':
+          toast.error('Incorrect password');
+          break;
+        case 'auth/invalid-credential':
+          toast.error('Invalid email or password');
+          break;
+        case 'auth/too-many-requests':
+          toast.error('Too many attempts. Please try again later');
+          break;
+        default:
+          toast.error(error.message || 'Authentication failed');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error('Please enter your email address first');
+      return;
+    }
+    
+    try {
+      await resetPassword(email);
+      toast.success('Password reset email sent!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reset email');
+    }
   };
 
   return (
@@ -162,6 +214,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   />
                 </div>
+              </div>
+            )}
+
+            {!isSignUp && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  Forgot password?
+                </button>
               </div>
             )}
 

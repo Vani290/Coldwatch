@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Save, RotateCcw, Thermometer, Droplets, Wind } from 'lucide-react';
+import { Save, RotateCcw, Thermometer, Droplets, Wind, CloudUpload } from 'lucide-react';
 import { useSensorData } from '@/contexts/SensorContext';
 import { SensorThresholds } from '@/types/sensor';
+import { syncThresholdsToThingSpeak } from '@/services/thingspeak';
 import { toast } from 'sonner';
 
 const defaultThresholds: SensorThresholds = {
@@ -13,6 +14,7 @@ const defaultThresholds: SensorThresholds = {
 const Settings: React.FC = () => {
   const { thresholds, updateThresholds } = useSensorData();
   const [formData, setFormData] = useState<SensorThresholds>(thresholds);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleChange = (
     sensor: keyof SensorThresholds,
@@ -28,15 +30,45 @@ const Settings: React.FC = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     updateThresholds(formData);
-    toast.success('Thresholds updated successfully');
+    toast.success('Thresholds updated locally');
+    
+    // Sync to ThingSpeak for ESP32
+    setIsSyncing(true);
+    const synced = await syncThresholdsToThingSpeak({
+      tempWarning: formData.temperature.warning,
+      tempCritical: formData.temperature.critical,
+      humidityWarning: formData.humidity.warning,
+      humidityCritical: formData.humidity.critical,
+      gasWarning: formData.gas.warning,
+      gasCritical: formData.gas.critical,
+    });
+    setIsSyncing(false);
+    
+    if (synced) {
+      toast.success('Thresholds synced to ESP32 via ThingSpeak');
+    } else {
+      toast.warning('Local save successful. ESP32 sync will retry in 15s (rate limit)');
+    }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setFormData(defaultThresholds);
     updateThresholds(defaultThresholds);
     toast.success('Thresholds reset to defaults');
+    
+    // Sync defaults to ThingSpeak
+    setIsSyncing(true);
+    await syncThresholdsToThingSpeak({
+      tempWarning: defaultThresholds.temperature.warning,
+      tempCritical: defaultThresholds.temperature.critical,
+      humidityWarning: defaultThresholds.humidity.warning,
+      humidityCritical: defaultThresholds.humidity.critical,
+      gasWarning: defaultThresholds.gas.warning,
+      gasCritical: defaultThresholds.gas.critical,
+    });
+    setIsSyncing(false);
   };
 
   return (
@@ -50,17 +82,28 @@ const Settings: React.FC = () => {
         <div className="flex gap-3">
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2 bg-secondary text-muted-foreground rounded-lg font-medium hover:text-foreground transition-colors"
+            disabled={isSyncing}
+            className="flex items-center gap-2 px-4 py-2 bg-secondary text-muted-foreground rounded-lg font-medium hover:text-foreground transition-colors disabled:opacity-50"
           >
             <RotateCcw className="w-4 h-4" />
             Reset to Defaults
           </button>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            disabled={isSyncing}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
-            Save Changes
+            {isSyncing ? (
+              <>
+                <CloudUpload className="w-4 h-4 animate-pulse" />
+                Syncing to ESP32...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Save & Sync
+              </>
+            )}
           </button>
         </div>
       </div>
