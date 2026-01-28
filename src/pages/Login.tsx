@@ -132,9 +132,6 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          © 2024 ColdWatch. Industrial Grade Monitoring.
-        </p>
       </div>
 
       {/* Right Panel - Login Form */}
