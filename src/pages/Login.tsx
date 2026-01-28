@@ -95,7 +95,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/20 via-background to-background p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/20 via-background to-background p-12 flex-col">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
             <Thermometer className="w-7 h-7 text-primary" />
@@ -106,7 +106,7 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 my-auto">
           <h2 className="text-4xl font-bold text-foreground leading-tight">
             Monitor your cold storage<br />
             <span className="text-primary text-glow">in real-time</span>
