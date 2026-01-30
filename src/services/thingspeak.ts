@@ -3,8 +3,8 @@
 // Field 1: Temperature, Field 2: Humidity, Field 3: Gas
 // Field 4: Temp Warning, Field 5: Temp Critical, Field 6: Humidity Warning, Field 7: Humidity Critical, Field 8: Gas Warning
 
-const THINGSPEAK_CHANNEL_ID = "3186649";
-const THINGSPEAK_READ_API_KEY = "1Q662QYR5B6OC2J7";
+const THINGSPEAK_CHANNEL_ID = "3240300";
+const THINGSPEAK_READ_API_KEY = "CGGM1F32HX57Q78K";
 const THINGSPEAK_WRITE_API_KEY = "2C8NMJXWK4Y3J7FK";
 
 export interface ThingSpeakFeed {
