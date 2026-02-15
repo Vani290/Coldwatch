@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "/Coldwatch/",   // 👈 ADD THIS LINE
+
   server: {
     host: "::",
     port: 8080,
@@ -12,10 +14,12 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -23,6 +27,7 @@ export default defineConfig(({ mode }) => ({
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
   },
+
   optimizeDeps: {
     include: ["react", "react-dom"],
   },
